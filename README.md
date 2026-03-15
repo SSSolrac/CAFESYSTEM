@@ -1,11 +1,57 @@
+# Staffowner Dashboard
 
-  # htc
+A production-ready React + TypeScript dashboard built with Vite and TailwindCSS. The project now uses a scalable feature-oriented architecture, includes authentication, protected routes, owner-only admin pages, login history tracking, toast feedback, dark mode toggle, and a customer loyalty tier system.
 
-  This is a code bundle for htc. The original project is available at https://www.figma.com/design/73YaemkDj47vIMaUOsZLdY/htc.
+## Tech Stack
 
-  ## Running the code
+- React
+- TypeScript
+- Vite
+- TailwindCSS
+- React Router
+- Sonner (toast notifications)
 
-  Run `npm i` to install the dependencies.
+## Installation
 
-  Run `npm run dev` to start the development server.
-  
+```bash
+npm install
+```
+
+## Development Commands
+
+```bash
+npm run dev
+npm run build
+```
+
+## Folder Structure
+
+```text
+src/
+  app/
+    App.tsx
+    router.tsx
+  auth/
+    AuthProvider.tsx
+    LoginPage.tsx
+  components/
+    dashboard/
+    navigation/
+    ui/
+  pages/
+    DashboardPage.tsx
+    ProfilePage.tsx
+    SettingsPage.tsx
+    admin/
+  hooks/
+  services/
+  utils/
+  types/
+  assets/
+```
+
+## Demo Accounts
+
+- `owner@happytails.com` (role: owner)
+- `staff@happytails.com` (role: staff)
+- Any non-empty password for demo mode
