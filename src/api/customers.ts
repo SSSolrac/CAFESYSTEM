@@ -1,8 +1,12 @@
 import { apiClient } from './client';
-import type { Customer } from '@/types/customer';
+import type { CustomerProfile } from '@/types/customer';
 
 export const customersApi = {
-  async list(): Promise<Customer[]> {
-    return apiClient.get<Customer[]>('/api/customers');
+  async list(): Promise<CustomerProfile[]> {
+    return apiClient.get<CustomerProfile[]>('/api/customers');
+  },
+
+  async getById(customerId: string): Promise<CustomerProfile> {
+    return apiClient.get<CustomerProfile>(`/api/customers/${customerId}`);
   },
 };

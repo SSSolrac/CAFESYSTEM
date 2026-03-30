@@ -2,7 +2,7 @@ import type { DateRangePreset } from './dashboard';
 import type { LoyaltyRewardName } from './loyalty';
 
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
-export type PaymentMethod = 'cash' | 'card' | 'e_wallet';
+export type PaymentMethod = 'cash' | 'e_wallet';
 
 export type OrderType = 'dine_in' | 'pickup' | 'takeout' | 'delivery';
 
@@ -52,7 +52,7 @@ export type Order = {
   discount: number;
   total: number;
   status: OrderStatus;
-  statusTimeline?: OrderStatusHistory[];
+  statusTimeline?: OrderStatusHistoryItem[];
   paymentStatus: PaymentStatus;
   paymentMethod: PaymentMethod;
   receiptImageUrl?: string;

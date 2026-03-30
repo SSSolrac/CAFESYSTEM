@@ -11,7 +11,7 @@ const statuses: Array<OrderStatus | 'all'> = ['all', 'pending', 'preparing', 're
 
 const getLoyaltyState = (order: Order): LoyaltyStampState => {
   if (order.loyaltyStampStatus === 'stamp-awarded') return 'granted';
-  if (order.loyaltyStampStatus === 'already-stamped' || loyaltyService.hasOrderAlreadyBeenStamped(order.id)) return 'already-stamped';
+  if (order.loyaltyStampStatus === 'already-stamped' || loyaltyService.hasOrderAlreadyBeenStamped(order)) return 'already-stamped';
   if (loyaltyService.canGrantStamp(order)) return 'eligible';
   return 'not-eligible';
 };
@@ -23,6 +23,12 @@ const loyaltyLabel: Record<LoyaltyStampState, string> = {
   'already-stamped': 'Already stamped',
 };
 
+
+const paymentMethodLabel = (method: Order['paymentMethod']) => {
+  if (method === 'e_wallet') return 'Maya / GCash';
+  return 'Cash';
+};
+
 const statusTone = (status: OrderStatus) => {
   if (status === 'completed' || status === 'delivered') return 'success';
   if (status === 'cancelled' || status === 'refunded') return 'danger';
@@ -31,10 +37,9 @@ const statusTone = (status: OrderStatus) => {
 };
 
 export const OrdersPage = () => {
-  const { orders, loading, error, query, status, range, setQuery, setStatus, setRange, confirmPayment, updateStatus } = useOrders();
+  const { orders, loading, error, query, status, range, setQuery, setStatus, setRange, getOrderById, confirmPayment, updateStatus } = useOrders();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [noteDraft, setNoteDraft] = useState('');
-
+  
   const statusSummary = useMemo(() => statuses.filter((item): item is OrderStatus => item !== 'all').map((item) => ({ status: item, total: orders.filter((order) => order.status === item).length })), [orders]);
 
   if (loading) return <p>Loading orders...</p>;
@@ -88,7 +93,7 @@ export const OrdersPage = () => {
                       </select>
                     </div>
                   </td>
-                  <td><StatusChip label={`${order.paymentStatus} · ${order.paymentMethod}`} tone={paid ? 'success' : 'warning'} /></td>
+                  <td><StatusChip label={`${order.paymentStatus} · ${paymentMethodLabel(order.paymentMethod)}`} tone={paid ? 'success' : 'warning'} /></td>
                   <td>
                     <div>
                       <p>{loyaltyLabel[loyaltyState]}</p>
@@ -96,7 +101,7 @@ export const OrdersPage = () => {
                     </div>
                   </td>
                   <td className="space-x-2">
-                    <button className="border rounded px-2 py-1" onClick={() => { setSelectedOrder(order); setNoteDraft(order.notes ?? ''); }}>Details</button>
+                    <button className="border rounded px-2 py-1" onClick={async () => { const detailed = await getOrderById(order.id); setSelectedOrder(detailed); }}>Details</button>
                     <button
                       className="border rounded px-2 py-1 disabled:opacity-50"
                       disabled={paid && loyaltyState === 'already-stamped'}
@@ -130,7 +135,7 @@ export const OrdersPage = () => {
                 <p><strong>Email:</strong> {selectedOrder.customerEmail ?? 'Not provided'}</p>
                 <p><strong>Phone:</strong> {selectedOrder.customerPhone ?? 'Not provided'}</p>
                 <p><strong>Created:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
-                <p className="capitalize"><strong>Payment:</strong> {selectedOrder.paymentStatus} via {selectedOrder.paymentMethod.replace('_', '-')}</p>
+                <p className="capitalize"><strong>Payment:</strong> {selectedOrder.paymentStatus} via {paymentMethodLabel(selectedOrder.paymentMethod)}</p>
                 <p><strong>Loyalty:</strong> {loyaltyLabel[getLoyaltyState(selectedOrder)]}</p>
                 <p><strong>Loyalty Source:</strong> {selectedOrder.loyaltyStampedBy === 'automatic-order-confirmation' ? 'Automatic from order confirmation' : 'Not yet stamped'}</p>
                 <p><strong>Loyalty Note:</strong> {selectedOrder.loyaltyMessage ?? 'No loyalty activity yet.'}</p>
@@ -156,7 +161,7 @@ export const OrdersPage = () => {
             <div className="border rounded p-3">
               <p className="font-medium text-sm mb-2">Status timeline</p>
               <div className="space-y-2 text-sm">
-                {selectedOrder.statusHistory.map((event, index) => (
+                {(selectedOrder.statusTimeline ?? []).map((event, index) => (
                   <div key={`${event.changedAt}-${event.status}-${index}`} className="border-l-2 pl-3">
                     <p className="capitalize font-medium">{event.status.replaceAll('_', ' ')}</p>
                     <p className="text-[#6B7280]">{new Date(event.changedAt).toLocaleString()}</p>
@@ -168,12 +173,11 @@ export const OrdersPage = () => {
 
             <div>
               <p className="font-medium text-sm mb-1">Internal order notes</p>
-              <textarea className="border rounded w-full px-2 py-1 text-sm" rows={4} value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} />
-              <p className="text-xs text-[#6B7280] mt-1">Notes are shown from order data. Editing requires a dedicated backend endpoint.</p>
+              <textarea className="border rounded w-full px-2 py-1 text-sm" rows={4} value={selectedOrder.notes ?? ''} readOnly />
+              <p className="text-xs text-[#6B7280] mt-1">Notes are read-only because the backend does not provide an order-notes update endpoint.</p>
             </div>
 
             <div className="flex gap-2">
-              <button className="border rounded px-3 py-1" onClick={async () => { const updated = await updateNotes(selectedOrder.id, noteDraft); setSelectedOrder(updated); toast.success('Order notes updated.'); }}>Save Notes</button>
               <button
                 className="border rounded px-3 py-1 disabled:opacity-50"
                 disabled={selectedOrder.paymentStatus === 'paid' && getLoyaltyState(selectedOrder) === 'already-stamped'}

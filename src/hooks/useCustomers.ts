@@ -13,15 +13,9 @@ export const useCustomers = () => {
     setLoading(false);
   }, []);
 
-  const grantManualStamp = useCallback(async (customerId: string, reason?: string) => {
-    const updated = await customerService.grantManualLoyaltyStamp(customerId, reason);
-    setCustomers((rows) => rows.map((customer) => (customer.id === customerId ? updated : customer)));
-    return updated;
-  }, []);
-
   useEffect(() => {
     loadCustomers();
   }, [loadCustomers]);
 
-  return { customers, loading, refresh: loadCustomers, grantManualStamp };
+  return { customers, loading, refresh: loadCustomers };
 };
