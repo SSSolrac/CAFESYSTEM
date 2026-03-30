@@ -46,7 +46,7 @@ export const OrdersPage = () => {
         <div className="flex flex-wrap items-end gap-3 justify-between">
           <div>
             <h2 className="text-lg font-semibold">Orders Operations</h2>
-            <p className="text-sm text-[#6B7280]">Track order progress, confirm payments and review loyalty/account status from backend records.</p>
+            <p className="text-sm text-[#6B7280]">Track order progress, confirm payments, and auto-award loyalty stamps (10-stamp card: Free Latte at 6, Free Groom at 10).</p>
           </div>
           <DateRangeFilter value={range} onChange={setRange} />
         </div>
@@ -102,7 +102,9 @@ export const OrdersPage = () => {
                       disabled={paid && loyaltyState === 'already-stamped'}
                       onClick={async () => {
                         const updated = await confirmPayment(order.id);
-                        toast.success('Payment confirmed.');
+                        if (updated.loyaltyStampStatus === 'stamp-awarded') toast.success('Payment confirmed. 1 stamp auto-awarded.');
+                        else if (updated.loyaltyStampStatus === 'already-stamped') toast.info('Payment confirmed. Loyalty was already applied for this order.');
+                        else toast.success('Payment confirmed.');
                       }}
                     >
                       {paid ? 'Recheck Payment' : 'Confirm Payment'}
@@ -154,7 +156,7 @@ export const OrdersPage = () => {
             <div className="border rounded p-3">
               <p className="font-medium text-sm mb-2">Status timeline</p>
               <div className="space-y-2 text-sm">
-                {(selectedOrder.statusTimeline ?? []).map((event, index) => (
+                {selectedOrder.statusHistory.map((event, index) => (
                   <div key={`${event.changedAt}-${event.status}-${index}`} className="border-l-2 pl-3">
                     <p className="capitalize font-medium">{event.status.replaceAll('_', ' ')}</p>
                     <p className="text-[#6B7280]">{new Date(event.changedAt).toLocaleString()}</p>
@@ -171,14 +173,16 @@ export const OrdersPage = () => {
             </div>
 
             <div className="flex gap-2">
-              <button className="border rounded px-3 py-1" onClick={() => toast.info('Order note editing requires backend endpoint support.')}>Save Notes</button>
+              <button className="border rounded px-3 py-1" onClick={async () => { const updated = await updateNotes(selectedOrder.id, noteDraft); setSelectedOrder(updated); toast.success('Order notes updated.'); }}>Save Notes</button>
               <button
                 className="border rounded px-3 py-1 disabled:opacity-50"
                 disabled={selectedOrder.paymentStatus === 'paid' && getLoyaltyState(selectedOrder) === 'already-stamped'}
                 onClick={async () => {
                   const updated = await confirmPayment(selectedOrder.id);
                   setSelectedOrder(updated);
-                  toast.success('Payment confirmed.');
+                  if (updated.loyaltyStampStatus === 'stamp-awarded') toast.success('Payment confirmed. Stamp auto-awarded.');
+                  else if (updated.loyaltyStampStatus === 'already-stamped') toast.info('Payment already confirmed and stamp already applied.');
+                  else toast.success('Payment confirmed.');
                 }}
               >
                 {selectedOrder.paymentStatus === 'paid' ? 'Recheck Payment' : 'Confirm Payment'}
