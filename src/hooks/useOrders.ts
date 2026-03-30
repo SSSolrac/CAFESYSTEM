@@ -23,6 +23,12 @@ export const useOrders = () => {
     }
   }, [query, status, range]);
 
+  const getOrderById = useCallback(async (orderId: string) => {
+    const updated = await orderService.getOrderById(orderId);
+    setOrders((rows) => rows.map((order) => (order.id === orderId ? updated : order)));
+    return updated;
+  }, []);
+
   const confirmPayment = useCallback(async (orderId: string) => {
     const updated = await orderService.confirmPayment(orderId);
     setOrders((rows) => rows.map((order) => (order.id === orderId ? updated : order)));
@@ -34,7 +40,6 @@ export const useOrders = () => {
     setOrders((rows) => rows.map((order) => (order.id === orderId ? updated : order)));
     return updated;
   }, []);
-
 
   useEffect(() => {
     loadOrders();
@@ -50,6 +55,7 @@ export const useOrders = () => {
     setQuery,
     setStatus,
     setRange,
+    getOrderById,
     confirmPayment,
     updateStatus,
     refresh: loadOrders,
