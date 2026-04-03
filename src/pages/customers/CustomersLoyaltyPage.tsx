@@ -57,13 +57,13 @@ export const CustomersLoyaltyPage = () => {
       <section className="grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 rounded-lg border bg-white dark:bg-slate-800 p-4 overflow-auto">
           <table className="w-full text-sm min-w-[880px]"><thead><tr className="text-left"><th>Name</th><th>Email</th><th>Stamps</th><th>Available Rewards</th><th>Redeemed</th><th>Status</th><th>Action</th></tr></thead><tbody>
-            {filtered.map((customer) => <tr key={customer.id} className="border-t"><td>{customer.fullName}</td><td>{customer.email}</td><td>{customer.loyalty.stampCount}/{LOYALTY_TOTAL_STAMPS}</td><td>{customer.loyalty.availableRewards.map((reward) => reward.label).join(', ') || 'None'}</td><td>{customer.loyalty.redeemedRewards.map((reward) => reward.label).join(', ') || 'None'}</td><td>{rewardReadiness(customer)}</td><td><button className="border rounded px-2 py-1" onClick={() => setSelected(customer)}>Details</button></td></tr>)}
+            {filtered.map((customer) => <tr key={customer.id} className="border-t"><td>{customer.fullName}</td><td>{customer.email}</td><td>{customer.loyalty.stampCount}/{LOYALTY_TOTAL_STAMPS}</td><td>{customer.loyalty.availableRewards.join(', ') || 'None'}</td><td>{customer.loyalty.redeemedRewards.join(', ') || 'None'}</td><td>{rewardReadiness(customer)}</td><td><button className="border rounded px-2 py-1" onClick={() => setSelected(customer)}>Details</button></td></tr>)}
           </tbody></table>
         </div>
         <aside className="rounded-lg border bg-white dark:bg-slate-800 p-4 space-y-3"><h3 className="font-medium">Customer activity snapshot</h3></aside>
       </section>
 
-      {selected && <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-20"><div className="w-full max-w-xl rounded-lg border bg-white dark:bg-slate-800 p-4 space-y-3"><div className="flex items-center justify-between"><h3 className="font-semibold">{selected.fullName}</h3><button className="border rounded px-2 py-1" onClick={() => setSelected(null)}>Close</button></div><p>Stamp count: {selected.loyalty.stampCount}</p><p>Available rewards: {selected.loyalty.availableRewards.map((reward) => reward.label).join(', ') || 'None'}</p></div></div>}
+      {selected && <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-20"><div className="w-full max-w-xl rounded-lg border bg-white dark:bg-slate-800 p-4 space-y-3"><div className="flex items-center justify-between"><h3 className="font-semibold">{selected.fullName}</h3><button className="border rounded px-2 py-1" onClick={() => setSelected(null)}>Close</button></div><p>Stamp count: {selected.loyalty.stampCount}</p><p>Available rewards: {selected.loyalty.availableRewards.join(', ') || 'None'}</p></div></div>}
     </div>
   );
 };

@@ -1,23 +1,14 @@
 import { apiClient } from './client';
 import { asRecord, unwrapDataObject } from './response';
-import type { LoyaltyAccount, Reward } from '@/types/customer';
+import type { LoyaltyAccount } from '@/types/customer';
 
 const mapReward = (raw: unknown): Reward => {
   const row = asRecord(raw) ?? {};
   return {
-    id: String(row.id ?? ''),
-    label: String(row.label ?? ''),
-    requiredStamps: Number(row.requiredStamps ?? 0),
-  };
-};
-
-const mapLoyalty = (raw: unknown): LoyaltyAccount => {
-  const row = asRecord(raw) ?? {};
-  return {
     customerId: String(row.customerId ?? ''),
     stampCount: Number(row.stampCount ?? 0),
-    availableRewards: Array.isArray(row.availableRewards) ? row.availableRewards.map(mapReward) : [],
-    redeemedRewards: Array.isArray(row.redeemedRewards) ? row.redeemedRewards.map(mapReward) : [],
+    availableRewards: Array.isArray(row.availableRewards) ? row.availableRewards.map((reward) => String(reward)) : [],
+    redeemedRewards: Array.isArray(row.redeemedRewards) ? row.redeemedRewards.map((reward) => String(reward)) : [],
     updatedAt: String(row.updatedAt ?? new Date().toISOString()),
   };
 };

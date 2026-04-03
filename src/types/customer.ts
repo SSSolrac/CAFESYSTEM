@@ -19,8 +19,8 @@ export interface Reward {
 export interface LoyaltyAccount {
   customerId: string;
   stampCount: number;
-  availableRewards: Reward[];
-  redeemedRewards: Reward[];
+  availableRewards: string[];
+  redeemedRewards: string[];
   updatedAt: string;
 }
 

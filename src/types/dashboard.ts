@@ -9,8 +9,33 @@ export type DashboardSummary = {
     averageOrderValue: number;
   };
   orders: {
-    today: number;
-    rangeTotal: number;
+    total: number;
+    byStatus: {
+      pending: number;
+      preparing: number;
+      ready: number;
+      out_for_delivery: number;
+      completed: number;
+      delivered: number;
+      cancelled: number;
+      refunded: number;
+    };
+  };
+  topItems: Array<{
+    itemName: string;
+    qtySold: number;
+    revenue: number;
+  }>;
+  recentOrders: Order[];
+  alerts: Array<{ id: string; message: string; type: 'info' | 'warning' | 'error' }>;
+
+  salesSummary?: {
+    todaySales: number;
+    weeklySales: number;
+    monthlySales: number;
+    averageOrderValue: number;
+  };
+  orderStatusSummary?: {
     pending: number;
     preparing: number;
     ready: number;
@@ -18,13 +43,15 @@ export type DashboardSummary = {
     completed: number;
     cancelled: number;
   };
-  topItems: Array<{
+  topSellingItems?: Array<{
     itemName: string;
     quantity: number;
     revenue: number;
   }>;
-  recentOrders: Order[];
-  alerts: Array<{ id: string; title: string; message: string; tone: 'info' | 'warning' | 'danger' }>;
+  customerSummary?: {
+    totalCustomers: number;
+    activeLoyaltyCustomers: number;
+  };
 };
 
 export type TrendPoint = {

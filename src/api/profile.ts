@@ -1,16 +1,6 @@
 import { apiClient } from './client';
-import { asRecord, unwrapData } from './response';
-
-export interface Profile {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  addresses: string[];
-  preferences: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-}
+import { unwrapDataObject } from './response';
+import type { CustomerProfile } from '@/types/customer';
 
 const emptyProfile = (): Profile => ({
   id: '',
@@ -39,12 +29,12 @@ const mapProfile = (raw: unknown): Profile => {
 };
 
 export const profileApi = {
-  async getMe(): Promise<Profile> {
+  async getMe(): Promise<CustomerProfile> {
     const payload = await apiClient.get<unknown>('/api/profile/me');
-    return mapProfile(unwrapData<unknown>(payload));
+    return unwrapDataObject<CustomerProfile>(payload);
   },
-  async updateMe(payload: Partial<Profile>): Promise<Profile> {
+  async updateMe(payload: Partial<CustomerProfile>): Promise<CustomerProfile> {
     const result = await apiClient.put<unknown>('/api/profile/me', payload);
-    return mapProfile(unwrapData<unknown>(result));
+    return unwrapDataObject<CustomerProfile>(result);
   },
 };
