@@ -1,6 +1,6 @@
 import type { CustomerProfile } from '@/types/customer';
 import type { DailyMenu } from '@/types/dailyMenu';
-import type { DashboardData, DateRangePreset } from '@/types/dashboard';
+import type { DashboardData } from '@/types/dashboard';
 import type { LoginHistoryEntry } from '@/types/loginHistory';
 import type { LoyaltyAccount } from '@/types/loyalty';
 import type { MenuItem } from '@/types/menuItem';
@@ -48,50 +48,29 @@ const getDb = (): Db => {
   return db;
 };
 
-const withinRange = (orderDate: string, range: DateRangePreset): boolean => {
-  if (range === 'today') return orderDate.slice(0, 10) === new Date().toISOString().slice(0, 10);
-
-  const days = range === '7d' ? 7 : range === '30d' ? 30 : 90;
-  const start = new Date();
-  start.setUTCDate(start.getUTCDate() - (days - 1));
-  start.setUTCHours(0, 0, 0, 0);
-  return new Date(orderDate) >= start;
-};
-
-const dashboard = (orders: Order[], range: DateRangePreset): DashboardData => {
+const dashboard = (orders: Order[]): DashboardData => {
+  const paid = orders.filter((o) => o.paymentStatus === 'paid');
   const today = new Date().toISOString().slice(0, 10);
-  const rangeOrders = orders.filter((o) => withinRange(o.createdAt, range));
-  const paidRangeOrders = rangeOrders.filter((o) => o.paymentStatus === 'paid');
   const todayOrders = orders.filter((o) => o.createdAt.slice(0, 10) === today);
-
-  const topItemMap = new Map<string, { itemName: string; quantity: number; revenue: number }>();
-  rangeOrders.forEach((order) => {
-    order.items.forEach((item) => {
-      const current = topItemMap.get(item.itemName) ?? { itemName: item.itemName, quantity: 0, revenue: 0 };
-      current.quantity += item.qty;
-      current.revenue += item.lineTotal;
-      topItemMap.set(item.itemName, current);
-    });
-  });
 
   return {
     sales: {
-      today: paidRangeOrders.filter((o) => o.createdAt.slice(0, 10) === today).reduce((sum, o) => sum + o.total, 0),
-      rangeTotal: paidRangeOrders.reduce((sum, o) => sum + o.total, 0),
-      averageOrderValue: paidRangeOrders.length ? paidRangeOrders.reduce((sum, o) => sum + o.total, 0) / paidRangeOrders.length : 0,
+      today: paid.filter((o) => o.createdAt.slice(0, 10) === today).reduce((sum, o) => sum + o.total, 0),
+      rangeTotal: paid.reduce((sum, o) => sum + o.total, 0),
+      averageOrderValue: paid.length ? paid.reduce((sum, o) => sum + o.total, 0) / paid.length : 0,
     },
     orders: {
       today: todayOrders.length,
-      rangeTotal: rangeOrders.length,
-      pending: rangeOrders.filter((o) => o.status === 'pending').length,
-      preparing: rangeOrders.filter((o) => o.status === 'preparing').length,
-      ready: rangeOrders.filter((o) => o.status === 'ready').length,
-      outForDelivery: rangeOrders.filter((o) => o.status === 'out_for_delivery').length,
-      completed: rangeOrders.filter((o) => o.status === 'completed').length,
-      cancelled: rangeOrders.filter((o) => o.status === 'cancelled').length,
+      rangeTotal: orders.length,
+      pending: orders.filter((o) => o.status === 'pending').length,
+      preparing: orders.filter((o) => o.status === 'preparing').length,
+      ready: orders.filter((o) => o.status === 'ready').length,
+      outForDelivery: orders.filter((o) => o.status === 'out_for_delivery').length,
+      completed: orders.filter((o) => o.status === 'completed').length,
+      cancelled: orders.filter((o) => o.status === 'cancelled').length,
     },
-    topItems: [...topItemMap.values()].sort((a, b) => b.quantity - a.quantity).slice(0, 5),
-    recentOrders: rangeOrders,
+    topItems: [],
+    recentOrders: orders,
     alerts: [],
   };
 };
