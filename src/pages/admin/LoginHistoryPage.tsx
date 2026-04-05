@@ -7,15 +7,14 @@ export const LoginHistoryPage = () => {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">Login History</h2>
-      <section className="grid md:grid-cols-4 gap-3">
+      <section className="grid md:grid-cols-3 gap-3">
         <div className="border rounded p-3">Total logins today: {stats.totalToday}</div>
         <div className="border rounded p-3">Failed logins: {stats.failed}</div>
         <div className="border rounded p-3">Staff logins: {stats.staff}</div>
-        <div className="border rounded p-3">Customer logins: {stats.customer}</div>
       </section>
       <section className="grid md:grid-cols-4 gap-2">
         <input className="border rounded px-2 py-1" placeholder="Search user" value={filters.query} onChange={(e) => setFilters({ ...filters, query: e.target.value, page: 1 })} />
-        <select className="border rounded px-2 py-1" value={filters.role} onChange={(e) => setFilters({ ...filters, role: e.target.value as typeof filters.role, page: 1 })}><option value="all">All roles</option><option value="owner">Owner</option><option value="staff">Staff</option><option value="customer">Customer</option></select>
+        <select className="border rounded px-2 py-1" value={filters.role} onChange={(e) => setFilters({ ...filters, role: e.target.value as typeof filters.role, page: 1 })}><option value="all">All roles</option><option value="owner">Owner</option><option value="staff">Staff</option></select>
         <input className="border rounded px-2 py-1" type="date" value={filters.date} onChange={(e) => setFilters({ ...filters, date: e.target.value, page: 1 })} />
         <select className="border rounded px-2 py-1" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value as typeof filters.status, page: 1 })}><option value="all">All status</option><option value="success">Success</option><option value="failed">Failed</option></select>
       </section>

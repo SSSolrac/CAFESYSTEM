@@ -1,11 +1,11 @@
 import { createContext, useMemo, useState } from 'react';
 import { authService } from '@/services/authService';
 import { loginHistoryService } from '@/services/loginHistoryService';
-import type { SessionUser, UserRole } from '@/types/user';
+import type { SessionUser } from '@/types/user';
 
 interface AuthContextType {
   user: SessionUser | null;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -19,15 +19,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return raw ? (JSON.parse(raw) as SessionUser) : null;
   });
 
-  const login = async (email: string, password: string, role: UserRole) => {
-    const session = await authService.login(email, password, role, navigator.userAgent);
+  const login = async (email: string, password: string) => {
+    const device = navigator.userAgent;
+    const session = await authService.login(email, password, device);
     setUser(session);
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+
+    try {
+      await loginHistoryService.recordLogin({
+        userId: session.id,
+        userName: session.name,
+        role: session.role,
+        loginTime: new Date().toISOString(),
+        logoutTime: '',
+        ipAddress: '127.0.0.1',
+        device,
+        loginStatus: 'success',
+      });
+    } catch {}
   };
 
   const logout = async () => {
-    if (user) await loginHistoryService.recordLogout(user.id);
+    if (user) {
+      try {
+        await loginHistoryService.recordLogout(user);
+      } catch {}
+    }
     setUser(null);
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_KEY);

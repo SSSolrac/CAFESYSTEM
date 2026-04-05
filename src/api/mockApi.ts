@@ -147,10 +147,19 @@ export const mockApi = {
     if (method === 'POST' && p === '/api/auth/login') {
       const b = asRecord(body) ?? {};
       const email = String(b.email ?? '').toLowerCase();
-      const role = String(b.role ?? 'staff') as UserRole;
-      const valid = (email === 'owner@happytails.com' && role === 'owner') || (email === 'staff@happytails.com' && role === 'staff') || (email === 'customer@happytails.com' && role === 'customer');
-      if (!valid) throw new Error('Invalid credentials');
-      const user: SessionUser = { id: role === 'owner' ? 'owner-1' : role === 'staff' ? 'staff-1' : 'customer-1', name: `${role[0].toUpperCase()}${role.slice(1)} User`, email, role, token: 'mock-token' };
+      const password = String(b.password ?? '');
+      if (!password) throw new Error('Invalid credentials');
+
+      const role: UserRole | null = email === 'owner@happytails.com' ? 'owner' : email === 'staff@happytails.com' ? 'staff' : null;
+      if (!role) throw new Error('Invalid credentials');
+
+      const user: SessionUser = {
+        id: role === 'owner' ? 'owner-1' : 'staff-1',
+        name: `${role[0].toUpperCase()}${role.slice(1)} User`,
+        email,
+        role,
+        token: 'mock-token',
+      };
       return clone(ok(user)) as T;
     }
     if (method === 'POST' && p === '/api/auth/login-history') {

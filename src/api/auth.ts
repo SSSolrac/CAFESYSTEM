@@ -1,13 +1,13 @@
 import { apiClient } from './client';
 import { unwrapDataObject } from './response';
 import type { LoginHistoryEntry, LoginHistoryFilters } from '@/types/loginHistory';
-import type { SessionUser, UserRole } from '@/types/user';
+import type { SessionUser } from '@/types/user';
 
 type LoginHistoryListResponse = { rows: LoginHistoryEntry[]; total: number };
 type LoginHistoryStats = { totalToday: number; failed: number; staff: number; customer: number };
 
 export const authApi = {
-  async login(payload: { email: string; password: string; role: UserRole; device: string }): Promise<SessionUser> {
+  async login(payload: { email: string; password: string; device: string }): Promise<SessionUser> {
     const response = await apiClient.post<unknown>('/api/auth/login', payload);
     return unwrapDataObject<SessionUser>(response);
   },
